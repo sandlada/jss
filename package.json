@@ -1,0 +1,16 @@
+{
+  "name": "@sandlada/jss",
+  "version": "0.0.1-20260623.a",
+  "description": "A simple CSS-in-JS library",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "tslib": "^2.8.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}
