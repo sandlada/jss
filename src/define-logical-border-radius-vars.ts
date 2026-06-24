@@ -1,5 +1,5 @@
-import type { NormalizeVarName, WithSemi } from './internal/utils.js'
-import { varName } from './internal/utils.js'
+import type { NormalizeVarName, WithSemi, JSSOptions } from './internal/utils.js'
+import { varName, applyPrefix } from './internal/utils.js'
 import { LOGICAL_CORNERS, buildCornerName, type LogicalCorner } from './internal/logical-corners.js'
 
 // ── Return-type helpers ──
@@ -38,21 +38,21 @@ export function defineLogicalBorderRadiusVars<
   V extends string,
 >(base: B, value: V): DefineRadius4Tuple<B, V, false>
 
-/** (base, value, true) → 4‑tuple with semicolons */
+/** (base, value, options) → string[] (generic, with prefix/semi) */
 export function defineLogicalBorderRadiusVars<
   B extends string,
   V extends string,
->(base: B, value: V, semi: true): DefineRadius4Tuple<B, V, true>
+>(base: B, value: V, options: JSSOptions): string[]
 
 /** ({base: value}) → merged array */
 export function defineLogicalBorderRadiusVars<
   const T extends Record<string, string>,
 >(bases: T): DefineRadiusArrayResult<T, false>
 
-/** ({base: value}, true) → merged array with semicolons */
+/** ({base: value}, options) → string[] (generic, with prefix/semi) */
 export function defineLogicalBorderRadiusVars<
   const T extends Record<string, string>,
->(bases: T, semi: true): DefineRadiusArrayResult<T, true>
+>(bases: T, options: JSSOptions): string[]
 
 /** () → empty */
 export function defineLogicalBorderRadiusVars(): []
@@ -61,27 +61,33 @@ export function defineLogicalBorderRadiusVars(): []
 
 export function defineLogicalBorderRadiusVars(
   baseOrBases?: string | Record<string, string>,
-  valueOrSemi?: string | boolean,
-  semi?: boolean,
+  valueOrOptions?: string | boolean | JSSOptions,
+  maybeOptions?: JSSOptions,
 ): string[] {
   if (baseOrBases === undefined) return []
 
   // Object input
   if (typeof baseOrBases === 'object' && baseOrBases !== null) {
-    const withSemi = valueOrSemi === true
+    const opts = typeof valueOrOptions === 'object' && valueOrOptions !== null
+      ? valueOrOptions as JSSOptions
+      : undefined
+    const prefix = opts?.prefix
+    const withSemi = opts?.semi ?? false
     return Object.entries(baseOrBases).flatMap(([base, val]) =>
       LOGICAL_CORNERS.map(
-        corner => `${buildCornerName(base, corner)}: ${val}${withSemi ? ';' : ''}`,
+        corner => `${applyPrefix(buildCornerName(base, corner), prefix)}: ${val}${withSemi ? ';' : ''}`,
       )
     )
   }
 
   // String input
   const base = baseOrBases
-  const value = valueOrSemi as string
-  const withSemi = semi === true
+  const value = valueOrOptions as string
+  const opts = maybeOptions
+  const prefix = opts?.prefix
+  const withSemi = opts?.semi ?? false
   return LOGICAL_CORNERS.map(
-    corner => `${buildCornerName(base, corner)}: ${value}${withSemi ? ';' : ''}`,
+    corner => `${applyPrefix(buildCornerName(base, corner), prefix)}: ${value}${withSemi ? ';' : ''}`,
   ) as any
 }
 

@@ -17,9 +17,9 @@ useVarsRecord({'color-primary': 'blue'})
  * 'color-primary': 'var(--color-primary, blue);',
  * }
  */
-useVarsRecord('color-primary', 'blue', true)
-useVarsRecord('--color-primary', 'blue', true)
-useVarsRecord({'color-primary': 'blue'}, true)
+useVarsRecord('color-primary', 'blue', { semi: true })
+useVarsRecord('--color-primary', 'blue', { semi: true })
+useVarsRecord({'color-primary': 'blue'}, { semi: true })
 
 /**
  * {
@@ -41,7 +41,7 @@ useVarsRecord({
 useVarsRecord({
     'color-primary': 'blue',
     '--_font-size-base': '16px'
-}, true)
+}, { semi: true })
 ```
 
 ## Special Usage
@@ -59,7 +59,7 @@ useVarsRecord(['a', 'b', 'c'], 'default-value')
  * 'a': 'var(--a, var(--b, var(--c, default-value)));',
  * }
  */
-useVarsRecord(['a', 'b', 'c'], 'default-value', true)
+useVarsRecord(['a', 'b', 'c'], 'default-value', { semi: true })
 
 /**
  * {
@@ -73,7 +73,7 @@ useVarsRecord(['a', 'b', 'c'], '')
  * 'a': 'var(--a, var(--b, var(--c, )));',
  * }
  */
-useVarsRecord(['a', 'b', 'c'], '', true)
+useVarsRecord(['a', 'b', 'c'], '', { semi: true })
 
 /**
  * {
@@ -87,7 +87,7 @@ useVarsRecord(['a', 'b', 'c'])
  * 'a': 'var(--a, var(--b, var(--c)));',
  * }
  */
-useVarsRecord(['a', 'b', 'c'], true)
+useVarsRecord(['a', 'b', 'c'], { semi: true })
 
 /**
  * {
@@ -98,5 +98,31 @@ useVarsRecord(['a', 'b', 'c'], true)
 useVarsRecord({
     'color-primary': [['a', 'b', 'c'], 'blue'],
     '--_font-size-base': '16px'
-}, true)
+}, { semi: true })
+
+/**
+ * {
+ * 'color-primary': 'var(--md-badge-color-primary, blue)',
+ * }
+ */
+useVarsRecord('color-primary', 'blue', { prefix: '--md-badge' })
+useVarsRecord({'color-primary': 'blue'}, { prefix: '--md-badge' })
+
+/**
+ * {
+ * 'color-primary': 'var(--md-badge-color-primary, blue)',
+ * 'font-size-base': 'var(--md-badge-font-size-base, 16px)',
+ * }
+ */
+useVarsRecord({
+    'color-primary': 'blue',
+    '--font-size-base': '16px'
+}, { prefix: '--md-badge' })
+
+/**
+ * {
+ * 'a': 'var(--md-badge-a, var(--md-badge-b, var(--md-badge-c, default-value)))',
+ * }
+ */
+useVarsRecord(['a', 'b', 'c'], 'default-value', { prefix: '--md-badge' })
 ```

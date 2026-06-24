@@ -1,8 +1,11 @@
 import {
   type NormalizeVarName,
   type WithSemi,
+  type JSSOptions,
   varName,
   stripDashPrefix,
+  applyPrefix,
+  parseOptions,
 } from './internal/utils.js'
 import {
   type CornerSuffix,
@@ -36,11 +39,11 @@ export function useLogicalBorderRadiusVars<
   F extends string,
 >(name: N, fallback: F): [LogicalRadiusVar<N, F>]
 
-/** (corner, fallback, true) → semicolon */
+/** (corner, fallback, options) → string[] (generic, with prefix/semi) */
 export function useLogicalBorderRadiusVars<
   N extends `${string}${CornerSuffix}`,
   F extends string,
->(name: N, fallback: F, semi: true): [WithSemi<LogicalRadiusVar<N, F>>]
+>(name: N, fallback: F, options: JSSOptions): string[]
 
 /** (corner) without fallback → just base fallback */
 export function useLogicalBorderRadiusVars<
@@ -54,12 +57,10 @@ export function useLogicalBorderRadiusVars<
   [K in keyof T]: LogicalRadiusVar<K & string, T[K] & string>
 }[keyof T]>
 
-/** ({corner: fallback}, true) → object with semicolon */
+/** ({corner: fallback}, options) → string[] (generic, with prefix/semi) */
 export function useLogicalBorderRadiusVars<
   const T extends Record<`${string}${CornerSuffix}`, string>,
->(vars: T, semi: true): Array<{
-  [K in keyof T]: WithSemi<LogicalRadiusVar<K & string, T[K] & string>>
-}[keyof T]>
+>(vars: T, options: JSSOptions): string[]
 
 /** () → empty */
 export function useLogicalBorderRadiusVars(): []
@@ -71,18 +72,22 @@ export function useLogicalBorderRadiusVars(vars: {}): []
 
 export function useLogicalBorderRadiusVars(
   nameOrVars?: string | Record<string, string>,
-  fallbackOrSemi?: string | boolean,
-  semi?: boolean,
+  fallbackOrSemiOrOptions?: string | boolean | JSSOptions,
+  semiOrOptions?: boolean | JSSOptions,
 ): string[] {
   // Empty
   if (nameOrVars === undefined) return []
   if (typeof nameOrVars === 'object' && nameOrVars !== null) {
     if (Object.keys(nameOrVars).length === 0) return []
-    const withSemi = fallbackOrSemi === true
+    const opts = (typeof fallbackOrSemiOrOptions === 'object' && fallbackOrSemiOrOptions !== null && !Array.isArray(fallbackOrSemiOrOptions)
+      ? fallbackOrSemiOrOptions as JSSOptions
+      : {}) as JSSOptions
+    const withSemi = opts.semi ?? false
+    const prefix = opts.prefix
     return Object.entries(nameOrVars).map(([key, value]) => {
       validateCornerName(key)
       const base = extractCornerBaseName(key)
-      const result = `var(${varName(key)}, var(${varName(base)}, ${value}))`
+      const result = `var(${applyPrefix(key, prefix)}, var(${applyPrefix(base, prefix)}, ${value}))`
       return withSemi ? `${result};` : result
     })
   }
@@ -92,21 +97,40 @@ export function useLogicalBorderRadiusVars(
   validateCornerName(name)
   const base = extractCornerBaseName(name)
 
-  if (typeof fallbackOrSemi === 'boolean') {
+  // Check for options object in the third position
+  if (semiOrOptions && typeof semiOrOptions === 'object' && !Array.isArray(semiOrOptions)) {
+    const opts = semiOrOptions as JSSOptions
+    const withSemi = opts.semi ?? false
+    const prefix = opts.prefix
+    const fallback = fallbackOrSemiOrOptions as string
+    const result = `var(${applyPrefix(name, prefix)}, var(${applyPrefix(base, prefix)}, ${fallback}))`
+    return [withSemi ? `${result};` : result]
+  }
+
+  // Check for options object in the second position (no fallback case)
+  if (fallbackOrSemiOrOptions && typeof fallbackOrSemiOrOptions === 'object' && !Array.isArray(fallbackOrSemiOrOptions)) {
+    const opts = fallbackOrSemiOrOptions as JSSOptions
+    const withSemi = opts.semi ?? false
+    const prefix = opts.prefix
+    const result = `var(${applyPrefix(name, prefix)}, var(${applyPrefix(base, prefix)}))`
+    return [withSemi ? `${result};` : result]
+  }
+
+  if (typeof fallbackOrSemiOrOptions === 'boolean') {
     // (name, true) — no fallback, with semicolon
     const result = `var(${varName(name)}, var(${varName(base)}))`
     return [`${result};`]
   }
 
-  if (fallbackOrSemi === undefined) {
+  if (fallbackOrSemiOrOptions === undefined) {
     // (name) — no fallback, no semicolon
     const result = `var(${varName(name)}, var(${varName(base)}))`
     return [result]
   }
 
   // (name, fallback) or (name, fallback, semi)
-  const fallback = fallbackOrSemi
-  const withSemi = semi === true
+  const fallback = fallbackOrSemiOrOptions
+  const withSemi = (typeof semiOrOptions === 'boolean') ? semiOrOptions : false
   const result = `var(${varName(name)}, var(${varName(base)}, ${fallback}))`
   return [withSemi ? `${result};` : result]
 }
@@ -123,13 +147,11 @@ export function useLogicalBorderRadiusVarsRecord<
   [K in RecordKey<N>]: LogicalRadiusVar<N, F>
 }
 
-/** (corner, fallback, true) → semicolon */
+/** (corner, fallback, options) → Record<string, string> (generic, with prefix/semi) */
 export function useLogicalBorderRadiusVarsRecord<
   N extends `${string}${CornerSuffix}`,
   F extends string,
->(name: N, fallback: F, semi: true): {
-  [K in RecordKey<N>]: WithSemi<LogicalRadiusVar<N, F>>
-}
+>(name: N, fallback: F, options: JSSOptions): Record<string, string>
 
 /** (corner) without fallback */
 export function useLogicalBorderRadiusVarsRecord<
@@ -145,12 +167,10 @@ export function useLogicalBorderRadiusVarsRecord<
   [K in keyof T as RecordKey<K & string>]: LogicalRadiusVar<K & string, T[K] & string>
 }
 
-/** ({corner: fallback}, true) → semicolon */
+/** ({corner: fallback}, options) → Record<string, string> (generic, with prefix/semi) */
 export function useLogicalBorderRadiusVarsRecord<
   const T extends Record<`${string}${CornerSuffix}`, string>,
->(vars: T, semi: true): {
-  [K in keyof T as RecordKey<K & string>]: WithSemi<LogicalRadiusVar<K & string, T[K] & string>>
-}
+>(vars: T, options: JSSOptions): Record<string, string>
 
 /** () → empty */
 export function useLogicalBorderRadiusVarsRecord(): Record<string, never>
@@ -162,19 +182,23 @@ export function useLogicalBorderRadiusVarsRecord(vars: {}): Record<string, never
 
 export function useLogicalBorderRadiusVarsRecord(
   nameOrVars?: string | Record<string, string>,
-  fallbackOrSemi?: string | boolean,
-  semi?: boolean,
+  fallbackOrSemiOrOptions?: string | boolean | JSSOptions,
+  semiOrOptions?: boolean | JSSOptions,
 ): Record<string, string> {
   // Empty
   if (nameOrVars === undefined) return {}
   if (typeof nameOrVars === 'object' && nameOrVars !== null) {
     if (Object.keys(nameOrVars).length === 0) return {}
+    const opts = (typeof fallbackOrSemiOrOptions === 'object' && fallbackOrSemiOrOptions !== null && !Array.isArray(fallbackOrSemiOrOptions)
+      ? fallbackOrSemiOrOptions as JSSOptions
+      : {}) as JSSOptions
+    const withSemi = opts.semi ?? false
+    const prefix = opts.prefix
     return Object.fromEntries(
       Object.entries(nameOrVars).map(([key, value]) => {
         validateCornerName(key)
         const base = extractCornerBaseName(key)
-        const withSemi = fallbackOrSemi === true
-        const result = `var(${varName(key)}, var(${varName(base)}, ${value}))`
+        const result = `var(${applyPrefix(key, prefix)}, var(${applyPrefix(base, prefix)}, ${value}))`
         return [stripDashPrefix(key), withSemi ? `${result};` : result]
       }),
     )
@@ -186,21 +210,40 @@ export function useLogicalBorderRadiusVarsRecord(
   const base = extractCornerBaseName(name)
   const recordKey = stripDashPrefix(name)
 
-  if (typeof fallbackOrSemi === 'boolean') {
+  // Check for options object in the third position
+  if (semiOrOptions && typeof semiOrOptions === 'object' && !Array.isArray(semiOrOptions)) {
+    const opts = semiOrOptions as JSSOptions
+    const withSemi = opts.semi ?? false
+    const prefix = opts.prefix
+    const fallback = fallbackOrSemiOrOptions as string
+    const result = `var(${applyPrefix(name, prefix)}, var(${applyPrefix(base, prefix)}, ${fallback}))`
+    return { [recordKey]: withSemi ? `${result};` : result }
+  }
+
+  // Check for options object in the second position (no fallback case)
+  if (fallbackOrSemiOrOptions && typeof fallbackOrSemiOrOptions === 'object' && !Array.isArray(fallbackOrSemiOrOptions)) {
+    const opts = fallbackOrSemiOrOptions as JSSOptions
+    const withSemi = opts.semi ?? false
+    const prefix = opts.prefix
+    const result = `var(${applyPrefix(name, prefix)}, var(${applyPrefix(base, prefix)}))`
+    return { [recordKey]: withSemi ? `${result};` : result }
+  }
+
+  if (typeof fallbackOrSemiOrOptions === 'boolean') {
     // (name, true) — no fallback, with semicolon
     const result = `var(${varName(name)}, var(${varName(base)}))`
     return { [recordKey]: `${result};` }
   }
 
-  if (fallbackOrSemi === undefined) {
+  if (fallbackOrSemiOrOptions === undefined) {
     // (name) — no fallback
     const result = `var(${varName(name)}, var(${varName(base)}))`
     return { [recordKey]: result }
   }
 
   // (name, fallback) or (name, fallback, semi)
-  const fallback = fallbackOrSemi
-  const withSemi = semi === true
+  const fallback = fallbackOrSemiOrOptions
+  const withSemi = (typeof semiOrOptions === 'boolean') ? semiOrOptions : false
   const result = `var(${varName(name)}, var(${varName(base)}, ${fallback}))`
   return { [recordKey]: withSemi ? `${result};` : result }
 }

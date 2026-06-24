@@ -1,57 +1,78 @@
 # Use Case
 
+这个功能应该要推广到尽可能多的api上
+
 ```ts
 const AppTokens = {
     'button-text-color': 'red',
     'button-bg-color': 'white',
-
-    // 需要攻克的常见特殊情况
     'button-shape': 'var(--md-sys-shape-corner-full, 9999px)',
 } as const
 
-/**
- * 期待的输出1
- * {
- * '--_button-text-color': 'var(--button-text-color, red)',
- * '--_button-bg-color': 'var(--button-bg-color, white)',
- * '--_button-shape': 'var(--button-shape, var(--md-sys-shape-corner-full, 9999px))',
- * }
- */
-const output = xxx(AppTokens)
+const options = {
+    prefix: '--md-badge',
+}
 
 /**
- * 期待的输出2
  * {
- * '--_button-text-color': 'var(--button-text-color, red);',
- * '--_button-bg-color': 'var(--button-bg-color, white);',
- * '--_button-shape': 'var(--button-shape, var(--md-sys-shape-corner-full, 9999px));',
+ * '--_button-text-color': 'var(--md-badge-button-text-color, red)',
+ * '--_button-bg-color': 'var(--md-badge-button-bg-color, white)',
+ * '--_button-shape': 'var(--md-badge-button-shape, var(--md-sys-shape-corner-full, 9999px))',
  * }
  */
-const output = xxx(AppTokens)
+defineTokenRefsRecord(AppTokens, options)
 
 /**
- * 期待的输出3
- * {
- * '--_button-text-color': 'var(--button-text-color, red)',
- * '--_button-bg-color': 'var(--button-bg-color, white)',
- * '--_button-shape-start-start': 'var(--button-shape-start-start, var(--md-sys-shape-corner-full, 9999px))',
- * '--_button-shape-start-end': 'var(--button-shape-start-end, var(--md-sys-shape-corner-full, 9999px))',
- * '--_button-shape-end-start': 'var(--button-shape-end-start, var(--md-sys-shape-corner-full, 9999px))',
- * '--_button-shape-end-end': 'var(--button-shape-end-end, var(--md-sys-shape-corner-full, 9999px))',
- * }
+ * [
+ * '--md-badge-container-shape-start-start: 4px',
+ * '--md-badge-container-shape-start-end: 4px',
+ * '--md-badge-container-shape-end-start: 4px',
+ * '--md-badge-container-shape-end-end: 4px',
+ * ]
  */
-const output = xxx(AppTokens)
+defineLogicalBorderRadiusVars('container-shape', '4px', options)
 
 /**
- * 期待的输出4
  * {
- * '--_button-text-color': 'var(--button-text-color, red)',
- * '--_button-bg-color': 'var(--button-bg-color, white)',
- * '--_button-shape-start-start': 'var(--button-shape-start-start, var(--button-shape, var(--md-sys-shape-corner-full, 9999px)))',
- * '--_button-shape-start-end': 'var(--button-shape-start-end, var(--button-shape, var(--md-sys-shape-corner-full, 9999px)))',
- * '--_button-shape-end-start': 'var(--button-shape-end-start, var(--button-shape, var(--md-sys-shape-corner-full, 9999px)))',
- * '--_button-shape-end-end': 'var(--button-shape-end-end, var(--button-shape, var(--md-sys-shape-corner-full, 9999px)))',
+ * 'container-shape-start-start': 'var(--md-badge-container-shape-start-start, var(--md-badge-container-shape, 12px))',
  * }
  */
-const output = xxx(AppTokens)
+useLogicalBorderRadiusVarsRecord('container-shape-start-start', '12px', options)
+
+/**
+ * ['var(--md-badge-container-shape-start-start, var(--md-badge-container-shape, 12px))']
+ */
+useLogicalBorderRadiusVars('container-shape-start-start', '12px', options)
+
+/**
+ * {
+ * '_color': 'var(--md-badge-color, red)',
+ * }
+ */
+useInternalVarsRecord('color', 'red', options)
+
+/**
+ * {
+ * 'color-primary': 'var(--md-badge-color-primary, blue)',
+ * }
+ */
+useVarsRecord('color-primary', 'blue', options)
+
+/**
+ * [
+ * 'var(--md-badge-color-primary, blue)',
+ * 'var(--md-badge-font-size-base, 16px)',
+ * ]
+ */
+useVars({
+    'color-primary': 'blue',
+    '--font-size-base': '16px'
+}, options)
+
+/**
+ * 不支持的api
+ */
+defineLogicalBorderRadiusVarsRecord('container-shape', '4px')
+defineVars('color', 'red')
+useInternalVars('color', 'red')
 ```

@@ -23,8 +23,8 @@ describe('useLogicalBorderRadiusVarsRecord', () => {
     })
   })
 
-  it('(corner, fallback, true) → semicolon', () => {
-    const r = useLogicalBorderRadiusVarsRecord('--container-shape-start-start', '12px', true)
+  it('(corner, fallback, { semi: true }) → semicolon', () => {
+    const r = useLogicalBorderRadiusVarsRecord('--container-shape-start-start', '12px', { semi: true })
     expect(r).toStrictEqual({
       'container-shape-start-start':
         'var(--container-shape-start-start, var(--container-shape, 12px));',
@@ -68,12 +68,12 @@ describe('useLogicalBorderRadiusVarsRecord', () => {
     })
   })
 
-  it('({key: fallback}, true) → semicolon', () => {
+  it('({key: fallback}, { semi: true }) → semicolon', () => {
     const r = useLogicalBorderRadiusVarsRecord({
       'container-shape-start-start': '12px',
       '--container-shape-start-end': '16px',
       'container-shape-end-end': '',
-    }, true)
+    }, { semi: true })
     expect(r).toStrictEqual({
       'container-shape-start-start':
         'var(--container-shape-start-start, var(--container-shape, 12px));',
@@ -112,5 +112,25 @@ describe('useLogicalBorderRadiusVarsRecord', () => {
     expect(() => (useLogicalBorderRadiusVarsRecord as any)('container-shape-start', '4px')).toThrow()
     expect(() => (useLogicalBorderRadiusVarsRecord as any)('container-shape-start-en')).toThrow()
     expect(() => (useLogicalBorderRadiusVarsRecord as any)('container-shape-start-en', '4px')).toThrow()
+  })
+
+  // ── Prefix ──
+
+  it('(corner, fallback, { prefix }) → prefixes both corner and base', () => {
+    const r = useLogicalBorderRadiusVarsRecord('container-shape-start-start', '12px', { prefix: '--md-badge' })
+    expect(r).toStrictEqual({
+      'container-shape-start-start': 'var(--md-badge-container-shape-start-start, var(--md-badge-container-shape, 12px))',
+    })
+  })
+
+  it('({key: fallback}, { prefix }) → object input with prefix', () => {
+    const r = useLogicalBorderRadiusVarsRecord({
+      'container-shape-start-start': '12px',
+      'container-shape-start-end': '16px',
+    }, { prefix: '--md-badge' })
+    expect(r).toStrictEqual({
+      'container-shape-start-start': 'var(--md-badge-container-shape-start-start, var(--md-badge-container-shape, 12px))',
+      'container-shape-start-end': 'var(--md-badge-container-shape-start-end, var(--md-badge-container-shape, 16px))',
+    })
   })
 })

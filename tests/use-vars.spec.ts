@@ -13,14 +13,14 @@ describe('useVars', () => {
     expect(r).toStrictEqual(['var(--color-primary, blue)'])
   })
 
-  it('(name, fallback, true) → semicolon', () => {
-    const r = useVars('color-primary', 'blue', true)
+  it('(name, fallback, { semi: true }) → semicolon', () => {
+    const r = useVars('color-primary', 'blue', { semi: true })
     expectTypeOf(r).toEqualTypeOf<['var(--color-primary, blue);']>()
     expect(r).toStrictEqual(['var(--color-primary, blue);'])
   })
 
-  it('(name, fallback, true) with -- prefix', () => {
-    const r = useVars('--color-primary', 'blue', true)
+  it('(name, fallback, { semi: true }) with -- prefix', () => {
+    const r = useVars('--color-primary', 'blue', { semi: true })
     expect(r).toStrictEqual(['var(--color-primary, blue);'])
   })
 
@@ -32,8 +32,8 @@ describe('useVars', () => {
     ])
   })
 
-  it('({key: fallback}, true) → object with semicolon', () => {
-    const r = useVars({ 'color-primary': 'blue', '--_font-size-base': '16px' }, true)
+  it('({key: fallback}, { semi: true }) → object with semicolon', () => {
+    const r = useVars({ 'color-primary': 'blue', '--_font-size-base': '16px' }, { semi: true })
     expect(r).toStrictEqual([
       'var(--color-primary, blue);',
       'var(--_font-size-base, 16px);',
@@ -47,8 +47,8 @@ describe('useVars', () => {
     expect(r).toStrictEqual(['var(--a, var(--b, var(--c, default-value)))'])
   })
 
-  it('([chain], fallback, true) → with semicolon', () => {
-    const r = useVars(['a', 'b', 'c'], 'default-value', true)
+  it('([chain], fallback, { semi: true }) → with semicolon', () => {
+    const r = useVars(['a', 'b', 'c'], 'default-value', { semi: true })
     expect(r).toStrictEqual(['var(--a, var(--b, var(--c, default-value)));'])
   })
 
@@ -57,8 +57,8 @@ describe('useVars', () => {
     expect(r).toStrictEqual(['var(--a, var(--b, var(--c, )))'])
   })
 
-  it('([chain], "", true) → empty fallback with semi', () => {
-    const r = useVars(['a', 'b', 'c'], '', true)
+  it('([chain], "", { semi: true }) → empty fallback with semi', () => {
+    const r = useVars(['a', 'b', 'c'], '', { semi: true })
     expect(r).toStrictEqual(['var(--a, var(--b, var(--c, )));'])
   })
 
@@ -67,21 +67,44 @@ describe('useVars', () => {
     expect(r).toStrictEqual(['var(--a, var(--b, var(--c)))'])
   })
 
-  it('([chain], true) → no fallback with semi', () => {
-    const r = useVars(['a', 'b', 'c'], true)
+  it('([chain], { semi: true }) → no fallback with semi', () => {
+    const r = useVars(['a', 'b', 'c'], { semi: true })
     expect(r).toStrictEqual(['var(--a, var(--b, var(--c)));'])
   })
 
   // ── Nested chain in object values ──
 
-  it('({key: [[chain], fallback]}) → nested chain', () => {
+  it('({key: [[chain], fallback]}, { semi: true }) → nested chain', () => {
     const r = useVars({
       'color-primary': [['a', 'b', 'c'], 'blue'],
       '--_font-size-base': '16px',
-    }, true)
+    }, { semi: true })
     expect(r).toStrictEqual([
       'var(--color-primary, var(--a, var(--b, var(--c, blue))));',
       'var(--_font-size-base, 16px);',
     ])
+  })
+
+  // ── Prefix ──
+
+  it('(name, fallback, { prefix }) → prefixed var() reference', () => {
+    const r = useVars('color-primary', 'blue', { prefix: '--md-badge' })
+    expect(r).toStrictEqual(['var(--md-badge-color-primary, blue)'])
+  })
+
+  it('({key: value}, { prefix }) → prefixes var() references', () => {
+    const r = useVars({
+      'color-primary': 'blue',
+      '--font-size-base': '16px',
+    }, { prefix: '--md-badge' })
+    expect(r).toStrictEqual([
+      'var(--md-badge-color-primary, blue)',
+      'var(--md-badge-font-size-base, 16px)',
+    ])
+  })
+
+  it('([chain], fallback, { prefix }) → prefix on first chain element', () => {
+    const r = useVars(['a', 'b', 'c'], 'default-value', { prefix: '--md-badge' })
+    expect(r).toStrictEqual(['var(--md-badge-a, var(--b, var(--c, default-value)))'])
   })
 })

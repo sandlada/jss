@@ -1,6 +1,6 @@
 {
     "name": "@sandlada/jss",
-    "version": "0.0.1-20260624.a",
+    "version": "0.0.1-20260624.b",
     "description": "A simple CSS-in-JS library",
     "repository": {
         "type": "git",

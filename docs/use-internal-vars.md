@@ -8,12 +8,13 @@
  */
 useInternalVars('color', 'red')
 useInternalVars('--color', 'red')
+useInternalVars('--_color', 'red')
 
 /**
  * ['var(--_color, red);']
  */
-useInternalVars('color', 'red', true)
-useInternalVars('--color', 'red', true)
+useInternalVars('color', 'red', { semi: true })
+useInternalVars('--color', 'red', { semi: true })
 
 /**
  * [
@@ -35,7 +36,7 @@ useInternalVars({
 useInternalVars({
     'color': 'red',
     '--bg': 'blue'
-}, true)
+}, { semi: true })
 ```
 
 ## Special Usage
@@ -45,19 +46,19 @@ useInternalVars({
 useInternalVars(['a', 'b', 'c'], 'default-value')
 
 // 'var(--_a, var(--_b, var(--_c, default-value)));'
-useInternalVars(['a', 'b', 'c'], 'default-value', true)
+useInternalVars(['a', 'b', 'c'], 'default-value', { semi: true })
 
 // 'var(--_a, var(--_b, var(--_c, )))'
 useInternalVars(['a', 'b', 'c'], '')
 
 // 'var(--_a, var(--_b, var(--_c, )));'
-useInternalVars(['a', 'b', 'c'], '', true)
+useInternalVars(['a', 'b', 'c'], '', { semi: true })
 
 // 'var(--_a, var(--_b, var(--_c)))'
 useInternalVars(['a', 'b', 'c'])
 
 // 'var(--_a, var(--_b, var(--_c)));'
-useInternalVars(['a', 'b', 'c'], true)
+useInternalVars(['a', 'b', 'c'], { semi: true })
 
 /**
  * [
@@ -68,7 +69,7 @@ useInternalVars(['a', 'b', 'c'], true)
 useInternalVars({
     'color': [['a', 'b', 'c'], 'blue'],
     '--bg': 'blue'
-}, true)
+}, { semi: true })
 ```
 
 ## Error Usage

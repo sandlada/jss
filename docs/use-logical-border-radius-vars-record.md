@@ -40,8 +40,15 @@ useLogicalBorderRadiusVarsRecord('--_container-shape-start-start', '12px')
  * 'container-shape-start-start': 'var(--container-shape-start-start, var(--container-shape, 12px));',
  * }
  */
-useLogicalBorderRadiusVarsRecord('container-shape-start-start', '12px', true)
-useLogicalBorderRadiusVarsRecord('--container-shape-start-start', '12px', true)
+useLogicalBorderRadiusVarsRecord('container-shape-start-start', '12px', { semi: true })
+useLogicalBorderRadiusVarsRecord('--container-shape-start-start', '12px', { semi: true })
+
+/**
+ * {
+ * 'container-shape-start-start': 'var(--md-badge-container-shape-start-start, var(--md-badge-container-shape, 12px))',
+ * }
+ */
+useLogicalBorderRadiusVarsRecord('container-shape-start-start', '12px', { prefix: '--md-badge' })
 
 /**
  * {
@@ -63,9 +70,20 @@ useLogicalBorderRadiusVarsRecord({
  */
 useLogicalBorderRadiusVarsRecord({
     'container-shape-start-start': '12px',
-    '--container-shape-start-end': '16px'
+    '--container-shape-start-end': '16px',
     'container-shape-end-end': ''
-}, true)
+}, { semi: true })
+
+/**
+ * {
+ * 'container-shape-start-start': 'var(--md-badge-container-shape-start-start, var(--md-badge-container-shape, 12px))',
+ * 'container-shape-start-end': 'var(--md-badge-container-shape-start-end, var(--md-badge-container-shape, 16px))',
+ * }
+ */
+useLogicalBorderRadiusVarsRecord({
+    'container-shape-start-start': '12px',
+    '--container-shape-start-end': '16px'
+}, { prefix: '--md-badge' })
 ```
 
 ## Special Usage

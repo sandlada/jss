@@ -14,8 +14,8 @@ describe('useVarsRecord', () => {
     expect(r).toStrictEqual({ 'color-primary': 'var(--color-primary, blue)' })
   })
 
-  it('(name, fallback, true) → semicolon in value', () => {
-    const r = useVarsRecord('--color-primary', 'blue', true)
+  it('(name, fallback, { semi: true }) → semicolon in value', () => {
+    const r = useVarsRecord('--color-primary', 'blue', { semi: true })
     expect(r).toStrictEqual({ 'color-primary': 'var(--color-primary, blue);' })
   })
 
@@ -30,11 +30,11 @@ describe('useVarsRecord', () => {
     })
   })
 
-  it('({key: fallback}, true) → semicolon', () => {
+  it('({key: fallback}, { semi: true }) → semicolon', () => {
     const r = useVarsRecord({
       'color-primary': 'blue',
       '--_font-size-base': '16px',
-    }, true)
+    }, { semi: true })
     expect(r).toStrictEqual({
       'color-primary': 'var(--color-primary, blue);',
       '_font-size-base': 'var(--_font-size-base, 16px);',
@@ -50,8 +50,8 @@ describe('useVarsRecord', () => {
     })
   })
 
-  it('([chain], fallback, true) → semicolon', () => {
-    const r = useVarsRecord(['a', 'b', 'c'], 'default-value', true)
+  it('([chain], fallback, { semi: true }) → semicolon', () => {
+    const r = useVarsRecord(['a', 'b', 'c'], 'default-value', { semi: true })
     expect(r).toStrictEqual({
       a: 'var(--a, var(--b, var(--c, default-value)));',
     })
@@ -71,8 +71,8 @@ describe('useVarsRecord', () => {
     })
   })
 
-  it('([chain], true) → no fallback with semi', () => {
-    const r = useVarsRecord(['a', 'b', 'c'], true)
+  it('([chain], { semi: true }) → no fallback with semi', () => {
+    const r = useVarsRecord(['a', 'b', 'c'], { semi: true })
     expect(r).toStrictEqual({
       a: 'var(--a, var(--b, var(--c)));',
     })
@@ -80,14 +80,41 @@ describe('useVarsRecord', () => {
 
   // ── Nested chain in object values ──
 
-  it('({key: [[chain], fallback]}) → nested chain', () => {
+  it('({key: [[chain], fallback]}, { semi: true }) → nested chain', () => {
     const r = useVarsRecord({
       'color-primary': [['a', 'b', 'c'], 'blue'],
       '--_font-size-base': '16px',
-    }, true)
+    }, { semi: true })
     expect(r).toStrictEqual({
       'color-primary': 'var(--color-primary, var(--a, var(--b, var(--c, blue))));',
       '_font-size-base': 'var(--_font-size-base, 16px);',
+    })
+  })
+
+  // ── Prefix ──
+
+  it('(name, fallback, { prefix }) → prefixed var() reference', () => {
+    const r = useVarsRecord('color-primary', 'blue', { prefix: '--md-badge' })
+    expect(r).toStrictEqual({
+      'color-primary': 'var(--md-badge-color-primary, blue)',
+    })
+  })
+
+  it('({key: value}, { prefix }) → prefixes var() references', () => {
+    const r = useVarsRecord({
+      'color-primary': 'blue',
+      '--font-size-base': '16px',
+    }, { prefix: '--md-badge' })
+    expect(r).toStrictEqual({
+      'color-primary': 'var(--md-badge-color-primary, blue)',
+      'font-size-base': 'var(--md-badge-font-size-base, 16px)',
+    })
+  })
+
+  it('([chain], fallback, { prefix }) → prefix on chain', () => {
+    const r = useVarsRecord(['a', 'b', 'c'], 'default-value', { prefix: '--md-badge' })
+    expect(r).toStrictEqual({
+      a: 'var(--md-badge-a, var(--b, var(--c, default-value)))',
     })
   })
 })

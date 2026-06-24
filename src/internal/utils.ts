@@ -41,6 +41,58 @@ export function stripDashPrefix<S extends string>(s: S): StripDash<S> {
   return (s.startsWith('--') ? s.slice(2) : s) as any
 }
 
+// ── JSSOptions ──
+
+/** Shared options for JSS functions that support semi and prefix. */
+export interface JSSOptions {
+  /** Append semicolons to output values */
+  semi?: boolean
+  /**
+   * CSS variable prefix to apply.
+   * Replaces the `--` prefix on variable names with the given prefix + `-`.
+   * @example `'--md-badge'` → `var(--md-badge-color-primary, blue)` instead of `var(--color-primary, blue)`
+   */
+  prefix?: string
+}
+
+/**
+ * Normalize a `JSSOptions` or `boolean` (legacy) to a resolved options object.
+ * This handles backward compat where `semi` was passed as a bare boolean.
+ */
+export function parseOptions(semiOrOptions?: boolean | JSSOptions): {
+  semi: boolean
+  prefix: string | undefined
+} {
+  if (typeof semiOrOptions === 'boolean') {
+    return { semi: semiOrOptions, prefix: undefined }
+  }
+  if (semiOrOptions && typeof semiOrOptions === 'object') {
+    return {
+      semi: semiOrOptions.semi ?? false,
+      prefix: semiOrOptions.prefix,
+    }
+  }
+  return { semi: false, prefix: undefined }
+}
+
+/**
+ * Apply a CSS variable prefix to a name.
+ *
+ * @param name - The CSS variable name (with or without `--` prefix)
+ * @param prefix - The prefix to apply (e.g. `'--md-badge'`)
+ * @returns The prefixed CSS variable name
+ *
+ * @example
+ * applyPrefix('color-primary', '--md-badge') → '--md-badge-color-primary'
+ * applyPrefix('--color-primary', '--md-badge') → '--md-badge-color-primary'
+ * applyPrefix('color-primary', undefined) → '--color-primary'
+ */
+export function applyPrefix(name: string, prefix?: string): string {
+  if (!prefix) return varName(name)
+  const bareName = name.startsWith('--') ? name.slice(2) : name
+  return `${prefix}-${bareName}`
+}
+
 /**
  * Build a nested `var()` chain.
  *

@@ -25,7 +25,15 @@ useInternalVarsRecord({'text-color': 'red', 'bg-color': 'blue'})
  * '_bg-color': 'var(--bg-color, red);',
  * }
  */
-useInternalVarsRecord({'text-color': 'red', 'bg-color': 'blue'}, true)
+useInternalVarsRecord({'text-color': 'red', 'bg-color': 'blue'}, { semi: true })
+
+/**
+ * {
+ * '_color': 'var(--md-badge-color, red)',
+ * }
+ */
+useInternalVarsRecord('color', 'red', { prefix: '--md-badge' })
+useInternalVarsRecord({'color': 'red'}, { prefix: '--md-badge' })
 ```
 
 ## Error Usage

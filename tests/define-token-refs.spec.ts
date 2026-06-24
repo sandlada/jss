@@ -209,4 +209,52 @@ describe('defineTokenRefsRecord — edge cases', () => {
       '--_color': 'var(--color, var(--base-color, pink))',
     })
   })
+
+  // ── Prefix ──
+
+  it('({key: value}, { prefix }) → prefixes var() references', () => {
+    const r = defineTokenRefsRecord({
+      'button-text-color': 'red',
+      'button-bg-color': 'white',
+    }, { prefix: '--md-badge' })
+    expect(r).toStrictEqual({
+      '--_button-text-color': 'var(--md-badge-button-text-color, red)',
+      '--_button-bg-color': 'var(--md-badge-button-bg-color, white)',
+    })
+  })
+
+  it('({key: value}, { prefix, semi }) → prefix with semicolons', () => {
+    const r = defineTokenRefsRecord({
+      'button-text-color': 'red',
+    }, { prefix: '--md-badge', semi: true })
+    expect(r).toStrictEqual({
+      '--_button-text-color': 'var(--md-badge-button-text-color, red);',
+    })
+  })
+
+  it('shape expansion with prefix', () => {
+    const r = defineTokenRefsRecord({
+      'button-shape': '9999px',
+    }, { prefix: '--md-badge', expandShapes: true })
+    expect(r).toStrictEqual({
+      '--_button-shape-start-start': 'var(--md-badge-button-shape-start-start, 9999px)',
+      '--_button-shape-start-end': 'var(--md-badge-button-shape-start-end, 9999px)',
+      '--_button-shape-end-start': 'var(--md-badge-button-shape-end-start, 9999px)',
+      '--_button-shape-end-end': 'var(--md-badge-button-shape-end-end, 9999px)',
+    })
+  })
+
+  it('shape expansion with useBaseFallback and prefix', () => {
+    const r = defineTokenRefsRecord({ 'button-shape': '9999px' }, {
+      prefix: '--md-badge',
+      expandShapes: true,
+      useBaseFallback: true,
+    })
+    expect(r).toStrictEqual({
+      '--_button-shape-start-start': 'var(--md-badge-button-shape-start-start, var(--md-badge-button-shape, 9999px))',
+      '--_button-shape-start-end': 'var(--md-badge-button-shape-start-end, var(--md-badge-button-shape, 9999px))',
+      '--_button-shape-end-start': 'var(--md-badge-button-shape-end-start, var(--md-badge-button-shape, 9999px))',
+      '--_button-shape-end-end': 'var(--md-badge-button-shape-end-end, var(--md-badge-button-shape, 9999px))',
+    })
+  })
 })

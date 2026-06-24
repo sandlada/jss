@@ -17,8 +17,8 @@ describe('useInternalVarsRecord', () => {
     })
   })
 
-  it('({key: value}, true) → semicolon', () => {
-    const r = useInternalVarsRecord({ 'text-color': 'red', 'bg-color': 'blue' }, true)
+  it('({key: value}, { semi: true }) → semicolon', () => {
+    const r = useInternalVarsRecord({ 'text-color': 'red', 'bg-color': 'blue' }, { semi: true })
     expect(r).toStrictEqual({
       '_text-color': 'var(--_text-color, red);',
       '_bg-color': 'var(--_bg-color, blue);',
@@ -26,6 +26,16 @@ describe('useInternalVarsRecord', () => {
   })
 
   // ── Error: underscore prefix ──
+
+  // ── Prefix ──
+
+  it('({key: value}, { prefix }) → --_ replaced by prefix', () => {
+    const r = useInternalVarsRecord({ 'color': 'red', 'bg-color': 'blue' }, { prefix: '--md-badge' })
+    expect(r).toStrictEqual({
+      '_color': 'var(--md-badge-color, red)',
+      '_bg-color': 'var(--md-badge-bg-color, blue)',
+    })
+  })
 
   it('throws for _ prefixed keys in object', () => {
     expect(() =>

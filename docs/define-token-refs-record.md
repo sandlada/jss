@@ -31,6 +31,14 @@ defineTokenRefsRecord(AppTokens, true)
 //   '--_button-text-color': 'var(--button-text-color, red);',
 //   ...
 // }
+
+// Output 3: 加上 CSS 變數前綴
+defineTokenRefsRecord(AppTokens, { prefix: '--md-badge' })
+// {
+//   '--_button-text-color': 'var(--md-badge-button-text-color, red)',
+//   '--_button-bg-color': 'var(--md-badge-button-bg-color, white)',
+//   '--_button-shape': 'var(--md-badge-button-shape, var(--md-sys-shape-corner-full, 9999px))',
+// }
 ```
 
 ## 形狀屬性展開
@@ -85,6 +93,11 @@ defineTokenRefsRecord({ 'container-shape': '8px', 'text-color': 'blue' }, {
 interface DefineTokenRefsOptions {
   /** 是否在值尾綴加上分號 */
   semi?: boolean
+  /**
+   * CSS 變數前綴，會套用到 var() 引用的變數名稱上。
+   * @example '--md-badge' → `var(--md-badge-button-text-color, red)`
+   */
+  prefix?: string
   /**
    * 要展開為四個邏輯角的鍵名。
    * - `true`: 自動偵測所有以 `shape` 結尾的鍵

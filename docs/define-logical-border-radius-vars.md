@@ -82,4 +82,24 @@ defineLogicalBorderRadiusVars('--', '4px')
  */
 defineLogicalBorderRadiusVars('_', '4px')
 defineLogicalBorderRadiusVars('--_', '4px')
+
+/**
+ * [
+ * '--md-badge-container-shape-start-start: 4px',
+ * '--md-badge-container-shape-start-end: 4px',
+ * '--md-badge-container-shape-end-start: 4px',
+ * '--md-badge-container-shape-end-end: 4px',
+ * ]
+ */
+defineLogicalBorderRadiusVars('container-shape', '4px', { prefix: '--md-badge' })
+
+/**
+ * [
+ * '--md-badge-container-shape-start-start: 4px;',
+ * '--md-badge-container-shape-start-end: 4px;',
+ * '--md-badge-container-shape-end-start: 4px;',
+ * '--md-badge-container-shape-end-end: 4px;',
+ * ]
+ */
+defineLogicalBorderRadiusVars('container-shape', '4px', { prefix: '--md-badge', semi: true })
 ```

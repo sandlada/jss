@@ -30,8 +30,13 @@ useLogicalBorderRadiusVars('--_container-shape-start-start', '12px')
 /**
  * ['var(--container-shape-start-start, var(--container-shape, 12px));']
  */
-useLogicalBorderRadiusVars('container-shape-start-start', '12px', true)
-useLogicalBorderRadiusVars('--container-shape-start-start', '12px', true)
+useLogicalBorderRadiusVars('container-shape-start-start', '12px', { semi: true })
+useLogicalBorderRadiusVars('--container-shape-start-start', '12px', { semi: true })
+
+/**
+ * ['var(--md-badge-container-shape-start-start, var(--md-badge-container-shape, 12px))']
+ */
+useLogicalBorderRadiusVars('container-shape-start-start', '12px', { prefix: '--md-badge' })
 
 /**
  * [
@@ -53,9 +58,20 @@ useLogicalBorderRadiusVars({
  */
 useLogicalBorderRadiusVars({
     'container-shape-start-start': '12px',
-    '--container-shape-start-end': '16px'
+    '--container-shape-start-end': '16px',
     'container-shape-end-end': ''
-}, true)
+}, { semi: true })
+
+/**
+ * [
+ * 'var(--md-badge-container-shape-start-start, var(--md-badge-container-shape, 12px))',
+ * 'var(--md-badge-container-shape-start-end, var(--md-badge-container-shape, 16px))',
+ * ]
+ */
+useLogicalBorderRadiusVars({
+    'container-shape-start-start': '12px',
+    '--container-shape-start-end': '16px'
+}, { prefix: '--md-badge' })
 ```
 
 ## Special Usage

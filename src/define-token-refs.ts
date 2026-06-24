@@ -4,6 +4,7 @@ import {
   type StripDash,
   varName,
   stripDashPrefix,
+  applyPrefix,
 } from './internal/utils.js'
 import { buildCornerName, LOGICAL_CORNERS } from './internal/logical-corners.js'
 
@@ -12,6 +13,11 @@ import { buildCornerName, LOGICAL_CORNERS } from './internal/logical-corners.js'
 export interface DefineTokenRefsOptions {
   /** Append semicolons to values */
   semi?: boolean
+  /**
+   * CSS variable prefix to apply to the var() references.
+   * @example '--md-badge' → `var(--md-badge-button-text-color, red)`
+   */
+  prefix?: string
   /**
    * Keys to expand into 4 logical corners (border-radius).
    * When `true`, auto-detects keys ending in `shape`.
@@ -69,6 +75,7 @@ export function defineTokenRefsRecord(
 ): Record<string, string> {
   // ── Parse options ──
   let semi = false
+  let prefix: string | undefined
   let expandShapes: readonly string[] | boolean = false
   let useBaseFallback = false
 
@@ -76,6 +83,7 @@ export function defineTokenRefsRecord(
     semi = semiOrOptions
   } else if (semiOrOptions) {
     semi = semiOrOptions.semi ?? false
+    prefix = semiOrOptions.prefix
     expandShapes = semiOrOptions.expandShapes ?? false
     useBaseFallback = semiOrOptions.useBaseFallback ?? false
   }
@@ -100,10 +108,10 @@ export function defineTokenRefsRecord(
 
         let varExpr: string
         if (useBaseFallback) {
-          const baseRef = `var(${varName(key)}, ${value})`
-          varExpr = `var(${cornerName}, ${baseRef})`
+          const baseRef = `var(${applyPrefix(key, prefix)}, ${value})`
+          varExpr = `var(${applyPrefix(cornerName, prefix)}, ${baseRef})`
         } else {
-          varExpr = `var(${cornerName}, ${value})`
+          varExpr = `var(${applyPrefix(cornerName, prefix)}, ${value})`
         }
 
         entries.push([recordKey, semi ? `${varExpr};` : varExpr])
@@ -112,7 +120,7 @@ export function defineTokenRefsRecord(
       // ── Simple: --_key: var(--key, value) ──
       const stripped = stripDashPrefix(key)
       const recordKey = `--_${stripped}`
-      const varExpr = `var(${varName(key)}, ${value})`
+      const varExpr = `var(${applyPrefix(key, prefix)}, ${value})`
       entries.push([recordKey, semi ? `${varExpr};` : varExpr])
     }
   }

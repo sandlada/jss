@@ -3,9 +3,12 @@ import {
   type BuildVarChainWithFallback,
   type BuildVarChainNoFallback,
   type WithSemi,
+  type JSSOptions,
   varName,
   stripDashPrefix,
   buildVarChain,
+  applyPrefix,
+  parseOptions,
 } from './internal/utils.js'
 import { assertNoUnderscorePrefix } from './internal/validators.js'
 
@@ -180,26 +183,30 @@ export function useInternalVarsRecord<const T extends Record<string, string>>(
   [K in keyof T as InternalRecordKey<K & string>]: `var(${InternalVarName<K & string>}, ${T[K]})`
 }
 
-/** ({name: value}, true) → semicolon */
+/** ({name: value}, options) → Record<string, string> (generic, with prefix/semi) */
 export function useInternalVarsRecord<const T extends Record<string, string>>(
   vars: T,
-  semi: true,
-): {
-  [K in keyof T as InternalRecordKey<K & string>]: WithSemi<`var(${InternalVarName<K & string>}, ${T[K]})`>
-}
+  options: JSSOptions,
+): Record<string, string>
 
 // ── Implementation ──
 
 export function useInternalVarsRecord(
   nameOrVars: string | Record<string, string>,
-  maybeSemi?: string | boolean,
+  maybeSemiOrOptions?: string | boolean | JSSOptions,
 ): Record<string, string> {
   if (typeof nameOrVars === 'object' && nameOrVars !== null) {
-    const withSemi = maybeSemi === true
+    const opts = (typeof maybeSemiOrOptions === 'object' && maybeSemiOrOptions !== null && !Array.isArray(maybeSemiOrOptions)
+      ? maybeSemiOrOptions as JSSOptions
+      : {}) as JSSOptions
+    const withSemi = opts.semi ?? false
+    const prefix = opts.prefix
     const entries = Object.entries(nameOrVars).map(([key, value]) => {
       assertNoUnderscorePrefix(key)
       const recordKey = `_${stripDashPrefix(key)}`
-      const result = `var(${internalVarName(key)}, ${value})`
+      // When prefix is set, replace --_ with the user prefix via applyPrefix
+      const varName = prefix ? applyPrefix(key, prefix) : internalVarName(key)
+      const result = `var(${varName}, ${value})`
       return [recordKey, withSemi ? `${result};` : result] as [string, string]
     })
     return Object.fromEntries(entries)
@@ -207,24 +214,7 @@ export function useInternalVarsRecord(
 
   const name = nameOrVars as string
   assertNoUnderscorePrefix(name)
-  const fallback = maybeSemi !== undefined && typeof maybeSemi === 'boolean'
-    ? ''
-    : (maybeSemi as string)
-  // Wait, for useInternalVarsRecord(name, fallback), the second arg is the fallback value
-  // For useInternalVarsRecord(name, fallback, semi), the third arg is the semicolon flag
-
-  // Fallback interpretation: if maybeSemi is a boolean, there was no fallback (shouldn't happen in normal usage)
-  // Actually, `useInternalVarsRecord('color', 'red')` — second arg is the fallback string 'red'
-  // There's no overload for `(name, semi: true)` without fallback
-  // So `maybeSemi` is always the fallback string here
-
-  // Actually looking at the overloads:
-  // useInternalVarsRecord(name: N, fallback: F) — fallback is a string
-  // useInternalVarsRecord(name: N, fallback: F, semi: true) — 3 params
-  // useInternalVarsRecord(vars: T) — object
-  // useInternalVarsRecord(vars: T, semi: true) — object with semi
-
-  // So for simple (name, fallback), maybeSemi is the fallback string.
+  const fallback = maybeSemiOrOptions as string
   const recordKey = `_${stripDashPrefix(name)}`
   const result = `var(${internalVarName(name)}, ${fallback})`
   return { [recordKey]: result }

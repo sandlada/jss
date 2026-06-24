@@ -12,8 +12,8 @@ useVars('--color-primary', 'blue')
 /**
  * ['var(--color-primary, blue);']
  */
-useVars('color-primary', 'blue', true)
-useVars('--color-primary', 'blue', true)
+useVars('color-primary', 'blue', { semi: true })
+useVars('--color-primary', 'blue', { semi: true })
 
 /**
  * [
@@ -35,7 +35,23 @@ useVars({
 useVars({
     'color-primary': 'blue',
     '--_font-size-base': '16px'
-}, true)
+}, { semi: true })
+
+/**
+ * ['var(--md-badge-color-primary, blue)']
+ */
+useVars('color-primary', 'blue', { prefix: '--md-badge' })
+
+/**
+ * [
+ * 'var(--md-badge-color-primary, blue)',
+ * 'var(--md-badge-font-size-base, 16px)',
+ * ]
+ */
+useVars({
+    'color-primary': 'blue',
+    '--font-size-base': '16px'
+}, { prefix: '--md-badge' })
 ```
 
 ## Special Usage
@@ -45,19 +61,19 @@ useVars({
 useVars(['a', 'b', 'c'], 'default-value')
 
 // 'var(--a, var(--b, var(--c, default-value)));'
-useVars(['a', 'b', 'c'], 'default-value', true)
+useVars(['a', 'b', 'c'], 'default-value', { semi: true })
 
 // 'var(--a, var(--b, var(--c, )))'
 useVars(['a', 'b', 'c'], '')
 
 // 'var(--a, var(--b, var(--c, )));'
-useVars(['a', 'b', 'c'], '', true)
+useVars(['a', 'b', 'c'], '', { semi: true })
 
 // 'var(--a, var(--b, var(--c)))'
 useVars(['a', 'b', 'c'])
 
 // 'var(--a, var(--b, var(--c)));'
-useVars(['a', 'b', 'c'], true)
+useVars(['a', 'b', 'c'], { semi: true })
 
 /**
  * [
@@ -68,5 +84,8 @@ useVars(['a', 'b', 'c'], true)
 useVars({
     'color-primary': [['a', 'b', 'c'], 'blue'],
     '--_font-size-base': '16px'
-}, true)
+}, { semi: true })
+
+// 'var(--md-badge-a, var(--md-badge-b, var(--md-badge-c, default-value)))'
+useVars(['a', 'b', 'c'], 'default-value', { prefix: '--md-badge' })
 ```

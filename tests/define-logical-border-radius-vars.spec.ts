@@ -46,8 +46,8 @@ describe('defineLogicalBorderRadiusVars', () => {
     ])
   })
 
-  it('({key: value}, true) → object with semicolon', () => {
-    const r = defineLogicalBorderRadiusVars({ 'container-shape': '4px' }, true)
+  it('({key: value}, { semi: true }) → object with semicolon', () => {
+    const r = defineLogicalBorderRadiusVars({ 'container-shape': '4px' }, { semi: true })
     expect(r).toStrictEqual([
       '--container-shape-start-start: 4px;',
       '--container-shape-start-end: 4px;',
@@ -99,6 +99,38 @@ describe('defineLogicalBorderRadiusVars', () => {
       '--_start-end: 4px',
       '--_end-start: 4px',
       '--_end-end: 4px',
+    ])
+  })
+
+  // ── Prefix ──
+
+  it('(base, value, { prefix }) → prefixed output names', () => {
+    const r = defineLogicalBorderRadiusVars('container-shape', '4px', { prefix: '--md-badge' })
+    expect(r).toStrictEqual([
+      '--md-badge-container-shape-start-start: 4px',
+      '--md-badge-container-shape-start-end: 4px',
+      '--md-badge-container-shape-end-start: 4px',
+      '--md-badge-container-shape-end-end: 4px',
+    ])
+  })
+
+  it('(base, value, { prefix, semi }) → prefixed with semicolons', () => {
+    const r = defineLogicalBorderRadiusVars('container-shape', '4px', { prefix: '--md-badge', semi: true })
+    expect(r).toStrictEqual([
+      '--md-badge-container-shape-start-start: 4px;',
+      '--md-badge-container-shape-start-end: 4px;',
+      '--md-badge-container-shape-end-start: 4px;',
+      '--md-badge-container-shape-end-end: 4px;',
+    ])
+  })
+
+  it('({key: value}, { prefix }) → object input with prefix', () => {
+    const r = defineLogicalBorderRadiusVars({ 'container-shape': '4px' }, { prefix: '--md-badge' })
+    expect(r).toStrictEqual([
+      '--md-badge-container-shape-start-start: 4px',
+      '--md-badge-container-shape-start-end: 4px',
+      '--md-badge-container-shape-end-start: 4px',
+      '--md-badge-container-shape-end-end: 4px',
     ])
   })
 })
