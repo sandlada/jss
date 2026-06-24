@@ -1,16 +1,57 @@
 {
-  "name": "@sandlada/jss",
-  "version": "0.0.1-20260623.a",
-  "description": "A simple CSS-in-JS library",
-  "main": "index.js",
-  "scripts": {},
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
-  "type": "module",
-  "devDependencies": {
-    "tslib": "^2.8.1",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
-  }
+    "name": "@sandlada/jss",
+    "version": "0.0.1-20260624.a",
+    "description": "A simple CSS-in-JS library",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sandlada/jss.git"
+    },
+    "bugs": {
+        "url": "https://github.com/sandlada/jss/issues"
+    },
+    "homepage": "https://github.com/sandlada/jss",
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "dist/**/*",
+        "LICENSES/**/*",
+        "LICENSE",
+        "README.md"
+    ],
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        }
+    },
+    "sideEffects": false,
+    "engines": {
+        "node": ">=18"
+    },
+    "scripts": {
+        "build": "tsc",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "typecheck": "tsc --noEmit",
+        "prepublishOnly": "npm run build && npm run test"
+    },
+    "keywords": [
+        "css-in-js",
+        "css-variables",
+        "custom-properties",
+        "design-tokens",
+        "typescript"
+    ],
+    "author": "Kai-Orion & Sandlada",
+    "license": "MIT",
+    "devDependencies": {
+        "tslib": "^2.8.1",
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.9"
+    }
 }
