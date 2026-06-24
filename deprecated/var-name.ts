@@ -1,1 +1,0 @@
-export const varName = <Name extends string>(name: Name): `--${Name}` => `--${name}`
