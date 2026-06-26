@@ -25,6 +25,7 @@ npm install @sandlada/jss
 | `defineLogicalBorderRadiusVars(base, value, options?)` | 展開為四個邏輯角（`start-start` / `start-end` / `end-start` / `end-end`），回傳陣列，支援 `{ semi?, prefix? }` | [docs/define-logical-border-radius-vars.md](./docs/define-logical-border-radius-vars.md)               |
 | `defineLogicalBorderRadiusVarsRecord(base, value)`     | 同上，但回傳 Record 物件                                                                                       | [docs/define-logical-border-radius-vars-record.md](./docs/define-logical-border-radius-vars-record.md) |
 | `defineTokenRefsRecord(tokens, options?)`              | 將設計 Token 綁定為內部變數（`--_key: var(--key, value)`），支援形狀屬性展開與 `{ prefix? }`                   | [docs/define-token-refs-record.md](./docs/define-token-refs-record.md)                                 |
+| `defineOverrides(source, overrides)(prefix?)`          | 型別安全的樣式覆蓋輔助，Curried API，可傳入 `null` 跳過型別約束                                                | [docs/define-overrides.md](./docs/define-overrides.md)                                                 |
 
 ```ts
 import { defineVars } from '@sandlada/jss'
@@ -75,6 +76,38 @@ defineTokenRefsRecord(AppTokens, { expandShapes: ['button-shape'], useBaseFallba
 ```
 
 ---
+
+## defineOverrides — 型別安全的樣式覆蓋
+
+```ts
+import { defineOverrides } from '@sandlada/jss'
+
+const FocusRing = {
+  'outline-color': 'red',
+  'outline-width': '2px',
+} as const
+
+// 型別安全模式：從 source 推導鍵值約束，所有鍵皆為可選
+// { 'outline-color': 'blue' }
+defineOverrides(FocusRing, { 'outline-color': 'blue' })()
+
+// 套用 CSS 變數前綴
+// { '--my-comp-outline-color': 'blue' }
+defineOverrides(FocusRing, { 'outline-color': 'blue' })('--my-comp')
+
+// 部分覆蓋或空物件皆可
+defineOverrides(FocusRing, {})()
+
+// 無型別約束模式：source 傳入 null
+defineOverrides(null, { 'outline-color': 'blue' })()
+
+// 實際使用：覆蓋共享元件樣式
+const CompB = {
+  'bg-color': 'blue',
+  ...defineOverrides(FocusRing, { 'outline-color': 'blue' })('--my-comp'),
+} as const
+// { 'bg-color': 'blue', '--my-comp-outline-color': 'blue' }
+```
 
 ---
 

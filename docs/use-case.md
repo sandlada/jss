@@ -1,78 +1,101 @@
 # Use Case
 
-这个功能应该要推广到尽可能多的api上
+新功能：
+
+- 提供類型化樣式覆蓋輔助
+- 使用xxx作爲新功能函數的暫時名稱
 
 ```ts
-const AppTokens = {
-    'button-text-color': 'red',
-    'button-bg-color': 'white',
-    'button-shape': 'var(--md-sys-shape-corner-full, 9999px)',
+/**
+ * 假設用戶擁有兩個組件樣式，分別是FocusRing, CompB
+ * 其中FocusRing是共享組件，CompB使用到FocusRing并且CompB需要覆蓋FocusRing的默認樣式
+ */
+const FocusRing = {
+    'outline-color': 'red',
+} as const
+const CompB = {
+    // CompB自己的樣式
+    'bg-color': 'blue',
+    // 此處需要覆蓋FocusRing的默認樣式
+    ...xxx(FocusRing, { 'outline-color': 'blue' }),
+} as const
+```
+
+可以接受的使用方式：
+
+```ts
+const FocusRing = {
+    'outline-color': 'red',
 } as const
 
-const options = {
-    prefix: '--md-badge',
-}
-
 /**
  * {
- * '--_button-text-color': 'var(--md-badge-button-text-color, red)',
- * '--_button-bg-color': 'var(--md-badge-button-bg-color, white)',
- * '--_button-shape': 'var(--md-badge-button-shape, var(--md-sys-shape-corner-full, 9999px))',
+ * 'outline-color': 'blue'
  * }
  */
-defineTokenRefsRecord(AppTokens, options)
+const overrideRecord = xxx({
+    'outline-color': 'blue'
+})
+```
 
-/**
- * [
- * '--md-badge-container-shape-start-start: 4px',
- * '--md-badge-container-shape-start-end: 4px',
- * '--md-badge-container-shape-end-start: 4px',
- * '--md-badge-container-shape-end-end: 4px',
- * ]
- */
-defineLogicalBorderRadiusVars('container-shape', '4px', options)
-
+```ts
 /**
  * {
- * 'container-shape-start-start': 'var(--md-badge-container-shape-start-start, var(--md-badge-container-shape, 12px))',
+ * 'outline-color': 'blue'
  * }
  */
-useLogicalBorderRadiusVarsRecord('container-shape-start-start', '12px', options)
+const overrideRecord = xxx(FocusRing, {
+    // 此處有類型提示
+    'outline-color': 'blue'
+})
+const overrideRecord = xxx<typeof FocusRing>({
+    // 此處有類型提示
+    'outline-color': 'blue'
+})
+// 這個勉强可接受，因爲需要輸入繁瑣的keyof typeof
+const overrideRecord = xxx<keyof typeof FocusRing>({
+    // 此處有類型提示
+    'outline-color': 'blue'
+})
+```
 
-/**
- * ['var(--md-badge-container-shape-start-start, var(--md-badge-container-shape, 12px))']
- */
-useLogicalBorderRadiusVars('container-shape-start-start', '12px', options)
-
+```ts
 /**
  * {
- * '_color': 'var(--md-badge-color, red)',
+ * '--my-comp-css-prefix-outline-color': 'blue'
  * }
  */
-useInternalVarsRecord('color', 'red', options)
+const overrideRecord = xxx(FocusRing, '--my-comp-css-prefix', {
+    // 此處有類型提示
+    'outline-color': 'blue'
+})
+const overrideRecord = xxx<typeof FocusRing>('--my-comp-css-prefix', {
+    // 此處有類型提示
+    'outline-color': 'blue'
+})
+```
 
-/**
- * {
- * 'color-primary': 'var(--md-badge-color-primary, blue)',
- * }
- */
-useVarsRecord('color-primary', 'blue', options)
+上述方法展示了xxx函數的使用場景，但考慮複雜的參數傳遞和認知負擔，需要使用函數式(如下給出了多種函數式設計原型，但考慮到第一種FocusRing是對象而非類型，所以我認爲方案一更可選)：
 
-/**
- * [
- * 'var(--md-badge-color-primary, blue)',
- * 'var(--md-badge-font-size-base, 16px)',
- * ]
- */
-useVars({
-    'color-primary': 'blue',
-    '--font-size-base': '16px'
-}, options)
+```ts
+const FocusRing = {
+    'outline-color': 'red',
+} as const
 
-/**
- * 不支持的api
- */
-defineLogicalBorderRadiusVarsRecord('container-shape', '4px')
-defineVars('color', 'red')
-useInternalVars('color', 'red')
+// 方案一
+const overrideRecord = xxx<typeof FocusRing>({
+    // 此處有類型提示
+    'outline-color': 'blue'
+})('--my-comp-css-prefix')
+// 方案一 變體 (更推薦方案一)
+const overrideRecord = xxx<keyof typeof FocusRing>({
+    // 此處有類型提示
+    'outline-color': 'blue'
+})('--my-comp-css-prefix')
+
+// 方案二
+const overrideRecord = xxx(FocusRing)('--my-comp-css-prefix', {
+    // 此處有類型提示
+    'outline-color': 'blue'
+})
 ```

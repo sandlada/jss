@@ -4,6 +4,7 @@ export {
   defineLogicalBorderRadiusVarsRecord,
 } from './define-logical-border-radius-vars.js'
 export { defineTokenRefsRecord } from './define-token-refs.js'
+export { defineOverrides } from './define-overrides.js'
 export { useVars, useVarsRecord } from './use-vars.js'
 export { useInternalVars, useInternalVarsRecord } from './use-internal-vars.js'
 export {

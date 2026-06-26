@@ -8,6 +8,7 @@ CSS 變數的**定義**（`--name: value`），用於輸出到樣式表。
 - [define-logical-border-radius-vars](./define-logical-border-radius-vars.md) — 展開為四個邏輯角（陣列）
 - [define-logical-border-radius-vars-record](./define-logical-border-radius-vars-record.md) — 展開為四個邏輯角（Record）
 - [define-token-refs-record](./define-token-refs-record.md) — 將設計 Token 綁定為內部變數（Record）
+- [define-overrides](./define-overrides.md) — 型別安全的樣式覆蓋輔助
 
 ## use 系列 — 產生 `var()` 引用
 
